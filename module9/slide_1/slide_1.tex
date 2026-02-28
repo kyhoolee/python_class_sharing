@@ -1,0 +1,253 @@
+\documentclass[10pt]{beamer}
+
+% Theme phổ biến, có thể thay bằng Warsaw, Madrid, Copenhagen,...
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+
+% Packages cần thiết
+\usepackage[vietnam]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{xspace}
+
+% Cấu hình code Python
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{red},
+  commentstyle=\color{gray}\itshape,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  tabsize=2,
+  captionpos=b
+}
+
+\title{TỰ ĐỘNG HÓA THU THẬP DỮ LIỆU TÀI CHÍNH \\ (DATA CRAWLING)}
+\subtitle{Python for Finance}
+\author{Ky Le Hong}
+\institute{Hà Nội, Tháng 01/2026}
+
+\begin{document}
+
+% Slide 1 - Title
+\begin{frame}
+  \titlepage
+  \vspace{1em}
+  \centering
+  \Large Python - trợ lý thu thập data tự động
+\end{frame}
+
+% Slide 2 - Vấn đề & Giải pháp
+\begin{frame}{Vấn đề \& Giải pháp}
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+      \textbf{Nỗi đau thường gặp:}
+      \begin{itemize}
+        \item Mở 10 tab web để copy giá mỗi sáng
+        \item Dữ liệu bị lệch dòng khi paste vào Excel
+        \item Không thể cập nhật realtime khi thị trường biến động
+      \end{itemize}
+
+    \column{0.45\textwidth}
+      \textbf{Giải pháp Python mang lại:}
+      \begin{itemize}
+        \item \textcolor{blue}{\textbf{Tốc độ}}: 100 mã chỉ trong $\sim$30 giây
+        \item \textcolor{blue}{\textbf{Chính xác}}: Không mỏi, không copy nhầm
+        \item \textcolor{blue}{\textbf{Tự động}}: Hẹn giờ chạy trước khi thức dậy
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+% Slide 3 - Giải phẫu một trang web
+\begin{frame}{Giải phẫu một trang web (Web Anatomy)}
+  \begin{itemize}
+    \item Trình duyệt \quad $\rightarrow$ \quad giống như \textbf{máy in}
+    \item Source Code (HTML) \quad $\rightarrow$ \quad giống như \textbf{bộ xương}
+    \item Inspect Element (F12) \quad $\rightarrow$ \quad \textbf{máy chụp X-Quang} của Data Analyst
+  \end{itemize}
+
+  \vspace{1.2em}
+  \centering
+  \large\textbf{Screenshot so sánh: Giao diện CafeF $\leftrightarrow$ F12 đầy code}
+  % \includegraphics[width=0.9\textwidth]{images/cafef_vs_f12.png}
+\end{frame}
+
+% Slide 4 - Chiến thuật: Biến số & Hằng số
+\begin{frame}{Chiến thuật: Tìm Biến số \& Hằng số}
+  \textbf{Quy luật vàng của Crawling:} Tìm ra những thứ \textbf{lặp lại}
+
+  \vspace{0.8em}
+  \begin{block}{Hằng số (Cố định)}
+    \begin{itemize}
+      \item Tên miền: \texttt{cafef.vn}
+      \item Cấu trúc bảng: \texttt{<table class="report">}
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{Biến số (Thay đổi)}
+    \begin{itemize}
+      \item Mã cổ phiếu: \texttt{HPG}, \texttt{VIC}, \texttt{VNM}, ...
+      \item Số trang: \texttt{page=1}, \texttt{page=2}, ...
+    \end{itemize}
+  \end{block}
+
+  \vspace{1em}
+  \centering
+  \Large Ví dụ URL: \texttt{https://cafef.vn/du-lieu/\textcolor{red}{\{BIẾN\_SỐ\}}.chn}
+\end{frame}
+
+% Slide 5 - Level 1 Hidden API
+\begin{frame}{Level 1 - Con đường bí mật (Hidden API)}
+  \begin{description}
+    \item[Phương pháp] Tìm API JSON ẩn sau giao diện
+    \item[Ưu điểm] Nhanh $\bullet$ Sạch $\bullet$ Dữ liệu dạng Key-Value
+    \item[Công cụ] Network Tab (F12) + \texttt{requests}
+    \item[Ví dụ điển hình] Lấy lịch sử giá CafeF (.ashx / .json)
+  \end{description}
+
+  \vspace{1em}
+  \textcolor{teal}{\Large $\Rightarrow$ Không cần phải vật lộn với HTML tag!}
+\end{frame}
+
+% Slide 6 - Demo Code API
+\begin{frame}[fragile]{Demo Code - Lấy dữ liệu qua API}
+\begin{lstlisting}
+import requests
+import pandas as pd
+
+url = "https://cafef.vn/.../PriceHistory.ashx"
+params = {"Symbol": "HPG"}
+
+response = requests.get(url, params=params)
+data = response.json()
+
+# Chuyển thẳng thành DataFrame
+df = pd.DataFrame(data['Data']['Data'])
+
+# Lưu nhanh
+df.to_excel("HPG_price_history.xlsx", index=False)
+\end{lstlisting}
+
+\footnotesize\textcolor{gray}{Chỉ cần thay \texttt{Symbol} là lấy được mã khác ngay!}
+\end{frame}
+
+% Slide 7 - Level 2 Static HTML
+\begin{frame}{Level 2 - Quét Web Tĩnh (Static HTML)}
+  \begin{itemize}
+    \item Đối tượng: Cophieu68, Vietstock cũ, ...
+    \item Đặc điểm: Dữ liệu nằm sẵn trong HTML
+    \item Vũ khí tối thượng (1 dòng code!):
+  \end{itemize}
+
+  \vspace{1.4em}
+  \centering
+  \Huge\texttt{pandas.read\_html(url)}
+
+  \vspace{0.6em}
+  \Large Tự động tìm tất cả thẻ \texttt{<table>} $\rightarrow$ DataFrame
+\end{frame}
+
+% Slide 8 - Thách thức Web Động
+\begin{frame}{Thách thức của Web hiện đại}
+  \begin{alertblock}{Vấn đề thường gặp}
+    \begin{enumerate}
+      \item Loading động (React/Vue): Requests chỉ lấy được khung rỗng
+      \item Anti-Bot protection: Chặn request không giống người thật
+      \item Redirect (Mobile $\rightarrow$ Desktop)
+    \end{enumerate}
+  \end{alertblock}
+\end{frame}
+
+% Slide 9 - Selenium - Robot giả lập
+\begin{frame}{Giải pháp: Selenium - Robot điều khiển trình duyệt thật}
+  \textbf{Cơ chế hoạt động:}
+  \begin{enumerate}
+    \item Mở trình duyệt Chrome thật (do code điều khiển)
+    \item Truy cập trang web
+    \item \textcolor{blue}{\textbf{Ngồi đợi}} (Explicit/Implicit Wait) cho dữ liệu tải xong
+    \item Lấy HTML $\rightarrow$ BeautifulSoup / pandas xử lý tiếp
+  \end{enumerate}
+
+  \vspace{1.5em}
+  \centering
+  \Large Robot đang điều khiển Chrome \quad $\rightarrow$ \quad \includegraphics[width=0.4\textwidth]{robot_chrome}
+\end{frame}
+
+% Slide 10 - Kỹ thuật Tàng hình
+\begin{frame}[fragile]{Kỹ thuật "Tàng hình" (Stealth Mode)}
+\begin{lstlisting}[language=Python]
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+options = Options()
+options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...")
+options.add_argument("--disable-blink-features=AutomationControlled")
+options.add_experimental_option("excludeSwitches", ["enable-automation"])
+options.add_experimental_option('useAutomationExtension', False)
+
+driver = webdriver.Chrome(options=options)
+\end{lstlisting}
+\end{frame}
+
+% Slide 11 - Parsing Strategies
+\begin{frame}{Kỹ thuật "Phẫu thuật" - Parsing bền vững}
+  \begin{block}{Chiến thuật được khuyên dùng}
+    \begin{enumerate}
+      \item Tìm theo \textbf{ID / Class cố định} (nếu có)
+      \item \textbf{Keyword Search} – Tìm theo \textbf{từ khóa} gần dữ liệu
+    \end{enumerate}
+  \end{block}
+
+  \vspace{1em}
+  \centering
+  \Large Ví dụ: Tìm chữ \textcolor{red}{"EPS"}, rồi lấy con số \textbf{ngay bên cạnh}
+  \vspace{0.5em}
+  \large $\Rightarrow$ Bền vững hơn rất nhiều khi web thay đổi giao diện
+\end{frame}
+
+% Slide 13 - Quy trình chuẩn
+\begin{frame}{Quy trình chuẩn của một Data Engineer}
+  \begin{enumerate}
+    \item \textbf{Điều tra} (Investigate): Web tĩnh hay động? Có API không? (F12)
+    \item \textbf{Chọn chiến thuật}: Requests (dễ) $\rightarrow$ Selenium (khó)
+    \item \textbf{Code \& Debug}: Xử lý anti-bot, chờ loading
+    \item \textbf{Parsing \& Lưu trữ}: Làm sạch, xuất Excel/CSV/Database
+  \end{enumerate}
+
+  \vspace{1.5em}
+  \centering
+  \Large \textbf{Thứ tự ưu tiên}: API > pandas.read\_html > Selenium
+\end{frame}
+
+% Slide 14 - Q&A & Bài tập
+\begin{frame}{Q\&A và Bài tập về nhà}
+  \begin{block}{Bài tập thực hành}
+    Xây dựng bot cập nhật danh mục đầu tư cá nhân \textbf{mỗi sáng}:
+    \begin{itemize}
+      \item Giá hiện tại
+      \item P/E
+      \item EPS
+    \end{itemize}
+    Từ danh sách mã do bạn tự chọn
+  \end{block}
+
+  \vspace{1em}
+  \begin{block}{Tài nguyên gợi ý}
+    \begin{itemize}
+      \item Github repo code mẫu
+      \item Cheat sheet Pandas + BeautifulSoup + Selenium
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\end{document}

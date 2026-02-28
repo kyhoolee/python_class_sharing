@@ -1,0 +1,95 @@
+# --- Python Bytecode & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- C & So files (nếu dùng thư viện compile) ---
+*.so
+
+# --- Distribution / Packaging (Khi build package) ---
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- PyInstaller (Nếu đóng gói thành file .exe) ---
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# --- Unit Test / Coverage ---
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# --- Jupyter Notebook ---
+.ipynb_checkpoints
+
+# --- Virtual Environments (Môi trường ảo) ---
+# Rất quan trọng, không bao giờ commit venv lên git
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --- IDE & Editor (Cấu hình riêng của máy bạn) ---
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# --- OS generated files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# --- Environment Variables (Chứa Key/Pass) ---
+# Cực kỳ quan trọng để bảo mật
+.env
+.env.local
+.env.*.local
+
+# --- Project Specific (Dành riêng cho dự án Crawl Data của bạn) ---
+
+# Bỏ qua thư mục chứa dữ liệu đã crawl (vì nó nặng và không cần version control)
+Data_Cube/
+*.csv
+*.xlsx
+*.xls
+*.db
+*.sqlite3
+
+# Bỏ qua file log nếu có
+*.log
